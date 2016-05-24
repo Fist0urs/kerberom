@@ -76,6 +76,8 @@ P = '\033[35m'  # purple
 C = '\033[36m'  # cyan
 GR = '\033[37m'  # gray
 
+verbose_level = 0
+
 class AttackParameters():
     def __init__(self, user_account = None, realm = None,
                 DC_addr = None, password = None,
@@ -244,8 +246,9 @@ class AttackParameters():
 
 
 def WRITE_STDERR(message):
-    sys.stderr.write(message)
-    sys.stderr.flush()
+    if verbose_level == 1:
+        sys.stderr.write(message)
+        sys.stderr.flush()
 
 
 def ldap_get_all_users_spn(AttackParameters, port):
@@ -422,6 +425,9 @@ def parse_arguments():
     group.add_argument('--hash', required=False, help="user's hash key. Format is \"LM:NT\".\
     Cannot be used with '-p'")
 
+    parser.add_argument('-v', '--verbose', required=False, action='store_const', const=1,
+    help="increase verbosity level")
+
     group2.add_argument('-k', '--user_sid', required=False, help="force ldap SPN\
     retrieval through kerberos, sid is mandatory. Cannot be used with '-i'")
 
@@ -487,6 +493,9 @@ if __name__ == '__main__':
     if options.input_TGT_File :
         DataSubmitted.Parse_TGT_File(options.input_TGT_File)
 
+    if options.verbose:
+        verbose_level = 1
+        
     # launching attack!
 
     # file containing SPN is provided
