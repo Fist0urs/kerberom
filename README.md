@@ -31,7 +31,7 @@ and providing password or hash (format LM:NT) of the account used.
 Install
 -------
 kerberom is a standalone script, all you need is the ldap3 tool suite (https://github.com/cannatag/ldap3)
-**Attention: prefer using github's ldap3 as it us the most up to date version**
+**Attention: prefer using github's ldap3 as it is the most up-to-date version**
 
 TODO
 ----
@@ -67,12 +67,13 @@ optional arguments:
                         clear password submitted. Cannot be used with '--hash'
   --hash HASH           user's hash key. Format is "LM:NT". Cannot be used
                         with '-p'
+  -v, --verbose         increase verbosity level
   -k USER_SID, --user_sid USER_SID
                         force ldap SPN retrieval through kerberos, sid is
                         mandatory. Cannot be used with '-i'
   -i INPUTFILE_SPN, --inputfile_spn INPUTFILE_SPN
                         retrieve TGS associated with SPN in user's provided
                         file. Format must be 'samaccountname$spn' on each
-                        line, 'samaccountname' can be 'unknown'
+                        line, 'samaccountname' can be 'unknown
 ```
 
