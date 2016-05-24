@@ -9,12 +9,12 @@ and hashcat (https://github.com/hashcat/oclHashcat). Cracking these tickets give
 
 Author
 ------
-- Fist0urs, <eddy (dot) maaalou (at) gmail (dot) com>
+- Fist0urs, eddy (dot) maaalou (at) gmail (dot) com
 
 Greetings
 ---------
 - The amazing impacket (https://github.com/CoreSecurity/impacket)
-- Sylvain Monne, sylvain dot monne at solucom dot fr
+- Sylvain Monne, sylvain (dot) monne (at) solucom (dot) fr
 
 kerberom.py
 -----------
@@ -31,6 +31,7 @@ and providing password or hash (format LM:NT) of the account used.
 Install
 -------
 kerberom is a standalone script, all you need is the ldap3 tool suite (https://github.com/cannatag/ldap3)
+**Attention: prefer using github's ldap3 as it us the most up to date version**
 
 TODO
 ----
