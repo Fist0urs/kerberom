@@ -175,7 +175,7 @@ class AttackParameters():
                 outputfile = open(self.outputfile_path,'w')
             except:
                 WRITE_STDERR(' cannot open \'%s\' exiting. \n' % self.outputfile_path)
-                exit()
+                sys.exit(1)
 
         # Iterate through list_spn and forge TGS
         target_service = target_host = ""
@@ -311,13 +311,13 @@ def ldap_get_all_users_spn(AttackParameters, port):
         c.open()
     except ldap3.core.exceptions.LDAPSocketOpenError as e:
         WRITE_STDERR(R + "ldap connection error: %s\n" % e + W)
-        exit()
+        sys.exit(1)
 
     try :
         r = c.bind()
     except:
         WRITE_STDERR(R + "Cannot connect to ldap, exiting.\n" + W)
-        exit()
+        sys.exit(1)
 
     # Query to find all accounts having a servicePrincipalName
     attributes_to_retrieve = [x.lower() for x in ATTRIBUTES_TO_RETRIEVE]
@@ -330,7 +330,7 @@ def ldap_get_all_users_spn(AttackParameters, port):
 
     if not c.response:
         WRITE_STDERR(R + "Cannot find any SPN, wrong user/credentials?\n" + W)
-        exit()
+        sys.exit(1)
 
     WRITE_STDERR('  [+] Retrieving all SPN and corresponding accounts...')
 
@@ -458,7 +458,7 @@ def parse_arguments():
     options = parser.parse_args()
     if not any(vars(options).values()):
         parser.print_help()
-        exit()
+        sys.exit(1)
     return options
 
 
