@@ -2,8 +2,13 @@ Kerberom
 ========
 
 Kerberom is a tool aimed to retrieve ARC4-HMAC'ed encrypted Tickets Granting Service (TGS) of accounts having a Service Principal Name (SPN) within
-an Active Directory. These tickets are stored in a format supported by John The Ripper bleeding-jumbo (https://github.com/magnumripper/JohnTheRipper)
-and hashcat (https://github.com/hashcat/oclHashcat). Cracking these tickets gives you the associated accounts' password within the Active Directory.
+an Active Directory.
+
+These tickets are stored in a format supported by John The Ripper bleeding-jumbo (https://github.com/magnumripper/JohnTheRipper)
+and hashcat (https://github.com/hashcat/oclHashcat).
+
+Cracking these tickets gives you the associated accounts' password within the Active Directory.
+
 **You do not need any third-part tools that are OS dependant (like mimikatz or PowerShell) and do not need privileged rights to use kerberom**
 
 
@@ -19,7 +24,7 @@ Greetings
 kerberom.py
 -----------
 
-Pre-requesite :
+Prerequisite :
 - A domain account (eventually its SID if NTLM authentication is disabled upon Kerberos)
 - The address of the Domain Controler (can be a FQDN or IP address)
 - The FQDN of the domain
@@ -31,6 +36,7 @@ and providing password or hash (format LM:NT) of the account used.
 Install
 -------
 kerberom is a standalone script, all you need is the ldap3 tool suite (https://github.com/cannatag/ldap3)
+
 **Attention: prefer using github's ldap3 as it is the most up-to-date version**
 
 TODO
@@ -68,12 +74,17 @@ optional arguments:
   --hash HASH           user's hash key. Format is "LM:NT". Cannot be used
                         with '-p'
   -v, --verbose         increase verbosity level
+  --delta DELTA         set time delta in Kerberos tickets. Useful when DC is
+                        not on the same timezone. Format is
+                        "(+/-)hours:minutes:seconds", eg. --delta="+00:05:00"
+                        or --delta="-02:00:00"
   -k USER_SID, --user_sid USER_SID
                         force ldap SPN retrieval through kerberos, sid is
                         mandatory. Cannot be used with '-i'
   -i INPUTFILE_SPN, --inputfile_spn INPUTFILE_SPN
                         retrieve TGS associated with SPN in user's provided
                         file. Format must be 'samaccountname$spn' on each
-                        line, 'samaccountname' can be 'unknown
+                        line, 'samaccountname' can be 'unknown'
+
 ```
 
