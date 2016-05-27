@@ -18,6 +18,7 @@ sys.path.append(os.path.realpath(os.path.dirname(__file__)+"./modules"))
 import argparse
 from random import getrandbits
 from time import time, localtime, strftime
+import datetime
 from ldap3 import Server, Connection, SIMPLE, \
     SYNC, ALL, SASL, NTLM
 
@@ -523,12 +524,12 @@ if __name__ == '__main__':
 
     if options.delta:
         sign = options.delta[0]
-        time_array = options.delta[1:].split(':')
+        time_array = map(int, options.delta[1:].split(':'))
 
         if sign == '+':
-            DataSubmitted.time_delta = int(time_array[0]) * 3600 + int(time_array[1]) * 60 + int(time_array[2])
+            DataSubmitted.time_delta = datetime.timedelta(hours=time_array[0], minutes=time_array[1], seconds=time_array[2]).total_seconds()
         elif sign == '-':
-            DataSubmitted.time_delta = - (int(time_array[0]) * 3600 + int(time_array[1]) * 60 + int(time_array[2]))
+            DataSubmitted.time_delta = - datetime.timedelta(hours=time_array[0], minutes=time_array[1], seconds=time_array[2]).total_seconds()
         else:
             sys.stderr.write(O + "Sign must be '+' or '-'. Exiting. \n" + W)
             sys.stderr.flush()
