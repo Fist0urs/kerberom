@@ -9,7 +9,7 @@ and hashcat (https://github.com/hashcat/oclHashcat).
 
 Cracking these tickets gives you the associated accounts' password within the Active Directory.
 
-**You do not need any third-part tools that are OS dependant (like mimikatz or PowerShell) and do not need privileged rights to use kerberom**
+**You do not need any third-party tools that are OS dependents (like mimikatz or PowerShell) and do not need privileged rights to use kerberom**
 
 
 Author
@@ -24,20 +24,18 @@ Greetings
 kerberom.py
 -----------
 
-Prerequisite :
+Prerequisites :
 - A domain account (eventually its SID if NTLM authentication is disabled upon Kerberos)
 - The address of the Domain Controler (can be a FQDN or IP address)
 - The FQDN of the domain
-- (Eventually a list of SPN with format samaccountname$spn, field "samaccountname" can be "unknown")
+- (Eventually a list of SPN with format "samaccountname$spn", field "samaccountname" can be "unknown")
 
 Tickets can be retrieved using NTLM authentication but also Kerberos (this one needs you to provide the account SID as you will have to use it to make up your PAC)
-and providing password or hash (format LM:NT) of the account used.
+and providing password or hash (format "LM:NT") of the account used.
 
 Install
 -------
-kerberom is a standalone script, all you need is the ldap3 tool suite (https://github.com/cannatag/ldap3)
-
-**Attention: prefer using github's ldap3 as it is the most up-to-date version**
+kerberom is a standalone script
 
 TODO
 ----
