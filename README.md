@@ -45,9 +45,9 @@ TODO
 Usage
 -----
 ```
-usage: kerberom.py [-h] -u USERNAME -d DOMAINCONTROLERADDR -o OUTPUTFILE
-                   [-iK INPUT_TGT_FILE] [-p PASSWORD | --hash HASH]
-                   [-k USER_SID | -i INPUTFILE_SPN]
+usage: kerberom.py [-h] -u USERNAME -d DOMAINCONTROLERADDR [-o OUTPUTFILE]
+                   [-iK INPUT_TGT_FILE] [-p PASSWORD | --hash HASH] [-v]
+                   [--delta DELTA] [-k USER_SID | -i INPUTFILE_SPN]
 
 Script to retrieve all accounts having an SPN and retrieving their TGS in
 rc4-hmac encrypted blob in John The Ripper 'krb5tgs' format and hashcat's one,
@@ -83,6 +83,5 @@ optional arguments:
                         retrieve TGS associated with SPN in user's provided
                         file. Format must be 'samaccountname$spn' on each
                         line, 'samaccountname' can be 'unknown'
-
 ```
 
