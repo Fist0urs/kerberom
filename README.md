@@ -41,13 +41,14 @@ Prerequisites in implicit authentication (Windows only):
 
 Install
 -------
-kerberom is a standalone script/binary
 
-Compilation (Windows only):
---------------------------
-HOW-TO is provided in bin/BUILD.md
+Pulling sources and building on-the-fly from Github:
 
-The binary is generated using PyInstaller and a new AES256 encryption key is generated each time the binary is compiled. This is only to break anti-viruses' signature engine based on kerberom source code.
+	pip install git+https://github.com/Fist0urs/kerberom
+
+Fetch package available from Pypy:
+
+	pip install kerberom
 
 Known-bug
 ---------
