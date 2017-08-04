@@ -21,8 +21,8 @@ Greetings
 - The amazing impacket (https://github.com/CoreSecurity/impacket)
 - Sylvain Monne, sylvain (dot) monne (at) solucom (dot) fr
 
-kerberom.py
------------
+kerberom
+--------
 
 Prerequisites in explicit authentication:
 - A domain account (eventually its SID if NTLM authentication is disabled upon Kerberos) and its credentials
@@ -50,6 +50,8 @@ Fetch package available from Pypy:
 
 	pip install kerberom
 
+For Windows users, the runnable kerberom binary will be located under *Scripts/* in your Python installation.
+
 Known-bug
 ---------
 Depending on your pyasn1 version, you may encounter parsing errors using explicit authentication.
@@ -57,7 +59,7 @@ Depending on your pyasn1 version, you may encounter parsing errors using explici
 Usage
 -----
 ```
-usage: kerberom.py [-h] [--implicit IMPLICIT] [-u USERNAME]
+usage: kerberom    [-h] [--implicit IMPLICIT] [-u USERNAME]
                    [-d DOMAINCONTROLERADDR] [-o OUTPUTFILE]
                    [-iK INPUT_TGT_FILE] [-p PASSWORD | --hash HASH] [-v]
                    [--delta DELTA] [-k USER_SID | -i INPUTFILE_SPN]
