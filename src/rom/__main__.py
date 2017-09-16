@@ -12,11 +12,12 @@
 
 # by Fist0urs
 
-import sys, os
-sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "modules")))
+import sys
+import os
 
 import argparse
 from random import getrandbits
+from getpass import getpass
 from time import time, localtime, strftime
 import datetime
 from ldap3 import Server, Connection, SIMPLE, \
@@ -29,7 +30,7 @@ from rom.ccache import CCache, kdc_rep2ccache
 from rom.util import epoch2gt, gt2epoch
 
 
-LDAP_PORT="389"
+LDAP_PORT ="389"
 
 # All not disabled user accounts except 'krbtg' account
 LDAP_QUERY = "(&\
@@ -457,9 +458,9 @@ def parse_arguments():
     return options
 
 
-if __name__ == '__main__':
-    from getpass import getpass
 
+
+def main():
     options = parse_arguments()
 
     if options.verbose:
@@ -617,7 +618,7 @@ if __name__ == '__main__':
         except:
             ccache_file = None
 
-        if options.password :
+        if options.password:
             DataSubmitted.password = options.password
             DataSubmitted.key = (RC4_HMAC, ntlm_hash(DataSubmitted.password).digest())
         elif options.hash:
@@ -633,10 +634,10 @@ if __name__ == '__main__':
             DataSubmitted.password = getpass('Password: ')
             DataSubmitted.key = (RC4_HMAC, ntlm_hash(DataSubmitted.password).digest())
 
-        if options.user_sid :
+        if options.user_sid:
             DataSubmitted.sid = options.user_sid
             DataSubmitted.auth_gssapi = True
-        elif options.inputfile_spn :
+        elif options.inputfile_spn:
             try:
                 inputfile_spn = open(options.inputfile_spn, 'r')
 
@@ -650,7 +651,7 @@ if __name__ == '__main__':
                 WRITE_STDOUT("Cannot open '" + options.inputfile_spn + "', exiting\n")
                 sys.exit(1)
 
-        if options.input_TGT_File :
+        if options.input_TGT_File:
             DataSubmitted.Parse_TGT_File(options.input_TGT_File)
 
         if options.delta:
@@ -677,7 +678,7 @@ if __name__ == '__main__':
             # authentification through Kerberos
             if DataSubmitted.auth_gssapi:
                 if not DataSubmitted.tgt:
-                    DataSubmitted.get_TGT(need_pac = True)
+                    DataSubmitted.get_TGT(need_pac=True)
                 DataSubmitted.list_spn = ldap_get_all_users_spn(DataSubmitted, LDAP_PORT)
                 DataSubmitted.TGS_attack()
             # authentification through NTLM
@@ -686,3 +687,7 @@ if __name__ == '__main__':
                 if not DataSubmitted.tgt:
                     DataSubmitted.get_TGT()
                 DataSubmitted.TGS_attack()
+
+
+if __name__ == '__main__':
+    main()
